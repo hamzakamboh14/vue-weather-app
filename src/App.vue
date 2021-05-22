@@ -25,6 +25,14 @@
           <div class="weather">{{weather.weather[0].main}}</div>
         </div>
       </div>
+      <div class="saved-cities">
+          <h3>You May want to see: </h3>
+            <div class="option" v-for="suggestion in suggestions" :key="suggestion"  >
+                <label > {{suggestion}} </label>
+                  <input type="radio" v-bind:value="suggestion" v-model="selected" @change="selectedWeather()" />
+                  <hr>
+            </div>
+        </div>
     </main>
   </div>
 </template>
@@ -38,6 +46,8 @@ export default {
       url_base: 'https://api.openweathermap.org/data/2.5/',
       query: "",
       weather: {},
+      suggestions:['Islamabad','Lahore','Karachi','Quetta','Peshawar'],
+      selected:""
     };
   },
   methods: {
@@ -48,7 +58,7 @@ export default {
         )
           .then((res) => {
             return res.json();
-          })
+          }).then(this.selected = '')
           .then(this.setResults);
       }
     },
@@ -66,7 +76,16 @@ export default {
       let year = d.getFullYear();
 
       return `${day} ${date} ${month} ${year}`
-    }
+    },
+      selectedWeather(){
+       fetch (
+          `${this.url_base}weather?q=${this.selected}&units=metric&APPID=${this.api_key}`
+        )
+          .then((res) => {
+            return res.json();
+          }).then(this.query = '')
+          .then(this.setResults);
+      },
   },
 };
 </script>
@@ -166,5 +185,27 @@ main {
   font-weight: 700;
   font-style: italic;
   text-shadow: 3px 6px rgba(0, 0, 0, 0.25);
+}
+.saved-cities{
+  margin: 0 auto;
+  margin-top:10px ;
+  display: block;
+  width: 100%;
+  padding: 15px;
+  color: #313131;
+  font-size: 20px;
+  appearance: none;
+  border: none;
+  outline: none;
+  background: none;
+  text-align: center;
+  box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.25);
+  background-color: rgba(255, 255, 255, 0.5);
+  transition: 0.4s;
+  color: #ffff;
+}
+.saved-cities .option{
+  display: inline-block;
+  padding: 15px;
 }
 </style>
