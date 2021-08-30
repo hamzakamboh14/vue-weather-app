@@ -1,5 +1,10 @@
 <template>
-  <div id="app" :class="typeof weather.main != 'undefined' && weather.main.temp > 16 ? 'warm' : ''">
+  <div
+    id="app"
+    :class="
+      typeof weather.main != 'undefined' && weather.main.temp > 16 ? 'warm' : ''
+    "
+  >
     <main>
       <div class="search-box">
         <input
@@ -10,47 +15,67 @@
           @keypress="fetchWeather"
         />
       </div>
-          
-      <div class="weather-wrap" v-if="typeof weather.main != 'undefined'"  >
+
+      <div class="weather-wrap" v-if="typeof weather.main != 'undefined'">
         <div class="location-box">
           <div class="location">
-            {{ weather.name }}, 
-            {{weather.sys.country}}
+            {{ weather.name }},
+            {{ weather.sys.country }}
           </div>
-          <div class="date">{{dateBuilder()}}</div>
+          <div class="date">{{ dateBuilder() }}</div>
         </div>
 
         <div class="weather-box">
-          <div class="temp">{{Math.round(weather.main.temp)}}°C</div>
-          <div class="weather">{{weather.weather[0].main}}</div>
+          <div class="temp">{{ Math.round(weather.main.temp) }}°C</div>
+          <div class="weather">{{ weather.weather[0].main }}</div>
         </div>
       </div>
       <div class="saved-cities">
-          <h3>You May want to see: </h3>
-            <div class="option" v-for="suggestion in suggestions" :key="suggestion"  >
-                <label > {{suggestion}} </label>
-                  <input type="radio" v-bind:value="suggestion" v-model="selected" @change="selectedWeather()" />
-                  <hr>
-            </div>
+        <h6 @click="currentLocation()">Current Location?</h6>
+        <h3>You May want to see:</h3>
+        <div class="option" v-for="suggestion in suggestions" :key="suggestion">
+          <label> {{ suggestion }} </label>
+          <input
+            type="radio"
+            v-bind:value="suggestion"
+            v-model="selected"
+            @change="selectedWeather()"
+          />
+          <hr />
         </div>
+      </div>
     </main>
   </div>
 </template>
 
 <script>
+import axios from "axios";
 export default {
   name: "App",
   data() {
     return {
-      api_key: '1a6e8314a843d7ca91a750dfc07c15de',
-      url_base: 'https://api.openweathermap.org/data/2.5/',
+      api_key: "1a6e8314a843d7ca91a750dfc07c15de",
+      url_base: "https://api.openweathermap.org/data/2.5/",
       query: "",
       weather: {},
-      suggestions:['Islamabad','Lahore','Karachi','Quetta','Peshawar'],
-      selected:""
+      suggestions: ["Islamabad", "Lahore", "Karachi", "Quetta", "Peshawar"],
+      selected: "",
     };
   },
   methods: {
+    currentLocation() {
+      axios.get("http://ip-api.com/json").then((res) => {
+        this.selected = res.data.city;
+        fetch(
+          `${this.url_base}weather?q=${this.selected}&units=metric&APPID=${this.api_key}`
+        )
+          .then((res) => {
+            return res.json();
+          })
+          .then((this.query = ""))
+          .then(this.setResults);
+      });
+    },
     fetchWeather(e) {
       if (e.key == "Enter") {
         fetch(
@@ -58,34 +83,57 @@ export default {
         )
           .then((res) => {
             return res.json();
-          }).then(this.selected = '')
+          })
+          .then((this.selected = ""))
           .then(this.setResults);
       }
     },
     setResults(results) {
       this.weather = results;
     },
-    dateBuilder(){
+    dateBuilder() {
       let d = new Date();
-      let months = ["January","Febraury","March","April","May","June","July","Auguest","September","October","November","December"];
-      let days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+      let months = [
+        "January",
+        "Febraury",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "Auguest",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      let days = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
 
       let day = days[d.getDay()];
       let date = d.getDate();
       let month = months[d.getMonth()];
       let year = d.getFullYear();
 
-      return `${day} ${date} ${month} ${year}`
+      return `${day} ${date} ${month} ${year}`;
     },
-      selectedWeather(){
-       fetch (
-          `${this.url_base}weather?q=${this.selected}&units=metric&APPID=${this.api_key}`
-        )
-          .then((res) => {
-            return res.json();
-          }).then(this.query = '')
-          .then(this.setResults);
-      },
+    selectedWeather() {
+      fetch(
+        `${this.url_base}weather?q=${this.selected}&units=metric&APPID=${this.api_key}`
+      )
+        .then((res) => {
+          return res.json();
+        })
+        .then((this.query = ""))
+        .then(this.setResults);
+    },
   },
 };
 </script>
@@ -105,9 +153,8 @@ body {
   background-position: bottom;
   transition: 0.4s;
 }
-#app .warm{
+#app .warm {
   background-image: url("./assets/warm-bg.jpg");
-  
 }
 main {
   min-height: 100vh;
@@ -186,9 +233,9 @@ main {
   font-style: italic;
   text-shadow: 3px 6px rgba(0, 0, 0, 0.25);
 }
-.saved-cities{
+.saved-cities {
   margin: 0 auto;
-  margin-top:10px ;
+  margin-top: 10px;
   display: block;
   width: 100%;
   padding: 15px;
@@ -204,7 +251,7 @@ main {
   transition: 0.4s;
   color: #ffff;
 }
-.saved-cities .option{
+.saved-cities .option {
   display: inline-block;
   padding: 15px;
 }
